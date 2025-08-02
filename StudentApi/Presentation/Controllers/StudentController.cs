@@ -89,6 +89,20 @@ namespace DefaultNamespace
 
             return Ok($"Current date in {cultureCode}: {formattedDate}");
         }
+        
+        [HttpPost("update")]
+        public IActionResult UpdateStudent([FromBody] UpdateStudent request)
+        {
+            var student = Students.FirstOrDefault(s => s.Id == request.Id);
+
+            if (student == null)
+                return NotFound($"Student with ID {request.Id} not found.");
+
+            student.Name = request.Name;
+            student.Email = request.Email;
+
+            return Ok($"Student with ID {request.Id} updated successfully.");
+        }
     }
     
     
