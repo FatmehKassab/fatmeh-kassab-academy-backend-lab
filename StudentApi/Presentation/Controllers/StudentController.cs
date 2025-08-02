@@ -36,5 +36,25 @@ namespace DefaultNamespace
             return await Task.FromResult(Ok(student));
         }
 
+        [HttpGet("filter")]
+        public async Task<ActionResult<List<Student>>> GetStudentsByName([FromQuery] string name)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                return BadRequest("Name query parameter is required.");
+            }
+
+            var filteredStudents = Students
+                .Where(s => s.Name.Contains(name, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+
+            if (!filteredStudents.Any())
+            {
+                return NotFound($"No students found matching name '{name}'.");
+            }
+
+            return await Task.FromResult(Ok(filteredStudents));
+        }
+
     }
 }
