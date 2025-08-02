@@ -103,6 +103,43 @@ namespace DefaultNamespace
 
             return Ok($"Student with ID {request.Id} updated successfully.");
         }
+        
+        [HttpPost("upload-image")]
+        [ApiExplorerSettings(IgnoreApi = true)]
+        public async Task<IActionResult> UploadImage([FromForm] IFormFile image)
+        {
+            if (image == null || image.Length == 0)
+            {
+                return BadRequest("No image file provided.");
+            }
+            
+            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif" };
+            var fileExtension = Path.GetExtension(image.FileName).ToLowerInvariant();
+            if (string.IsNullOrEmpty(fileExtension) || !allowedExtensions.Contains(fileExtension))
+            {
+                return BadRequest("Invalid file type. Only JPG, JPEG, PNG, and GIF are allowed.");
+            }
+            
+            var uploadsDirectory = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+            if (!Directory.Exists(uploadsDirectory))
+            {
+                Directory.CreateDirectory(uploadsDirectory);
+            }
+            
+            var uniqueFileName = Guid.NewGuid().ToString() + fileExtension;
+            var filePath = Path.Combine(uploadsDirectory, uniqueFileName);
+            
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await image.CopyToAsync(stream);
+            }
+
+
+            return Ok(new { 
+                message = "Image uploaded successfully.",
+                filePath = $"/uploads/{uniqueFileName}"
+            });
+        }
     }
     
     
