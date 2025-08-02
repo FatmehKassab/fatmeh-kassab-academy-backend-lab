@@ -140,6 +140,20 @@ namespace DefaultNamespace
                 filePath = $"/uploads/{uniqueFileName}"
             });
         }
+        
+        [HttpDelete("{id:long}")]
+        public IActionResult DeleteStudent([FromRoute] long id)
+        {
+            var student = Students.FirstOrDefault(s => s.Id == id);
+            if (student == null)
+            {
+                return NotFound($"Student with ID {id} not found.");
+            }
+
+            Students.Remove(student);
+            return Ok($"Student with ID {id} deleted successfully.");
+        }
+
     }
     
     
