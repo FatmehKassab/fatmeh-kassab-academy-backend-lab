@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "dgSpecHash": "QfNZ9HKgzVc=",
+  "success": true,
+  "projectFilePath": "F:\\academy_lab\\fatmeh_kassab_academy_lab_be\\fatmeh_kassab_academy_lab_be\\fatmeh_kassab_academy_lab_be.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Fatmeh Kassab\\.nuget\\packages\\microsoft.aspnetcore.openapi\\9.0.7\\microsoft.aspnetcore.openapi.9.0.7.nupkg.sha512",
+    "C:\\Users\\Fatmeh Kassab\\.nuget\\packages\\microsoft.openapi\\1.6.17\\microsoft.openapi.1.6.17.nupkg.sha512"
+  ],
+  "logs": []
+}
