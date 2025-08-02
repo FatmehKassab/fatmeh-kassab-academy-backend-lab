@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using DefaultNamespace.Models;
+using System.Globalization;
 
 namespace DefaultNamespace
 {
@@ -56,5 +57,39 @@ namespace DefaultNamespace
             return await Task.FromResult(Ok(filteredStudents));
         }
 
+        
+        
+        [HttpGet("date")]
+        public ActionResult<string> GetFormattedDate()
+        {
+     
+            var acceptLanguage = Request.Headers["Accept-Language"].ToString();
+
+      
+            var cultureCode = "en-US";
+
+            if (!string.IsNullOrWhiteSpace(acceptLanguage))
+            {
+                var languages = acceptLanguage.Split(',');
+                if (languages.Length > 0)
+                {
+                    var requestedCulture = languages[0].Trim();
+                    
+                    var supportedCultures = new[] { "en-US", "es-ES", "fr-FR" };
+                    if (supportedCultures.Contains(requestedCulture))
+                    {
+                        cultureCode = requestedCulture;
+                    }
+                }
+            }
+            
+            var culture = new CultureInfo(cultureCode);
+            
+            var formattedDate = DateTime.Now.ToString("D", culture);
+
+            return Ok($"Current date in {cultureCode}: {formattedDate}");
+        }
     }
+    
+    
 }
