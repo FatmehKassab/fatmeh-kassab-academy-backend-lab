@@ -24,5 +24,17 @@ namespace DefaultNamespace
         {
             return await Task.FromResult(Ok(Students));
         }
+        
+        [HttpGet("{id:long}")]
+        public async Task<ActionResult<Student>> GetStudent([FromRoute] long id)
+        {
+            var student = Students.FirstOrDefault(s => s.Id == id);
+
+            if (student == null)
+                return NotFound($"Student with ID {id} not found.");
+
+            return await Task.FromResult(Ok(student));
+        }
+
     }
 }
