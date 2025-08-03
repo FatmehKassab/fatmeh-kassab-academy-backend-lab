@@ -1,0 +1,127 @@
+using Microsoft.AspNetCore.Mvc;
+using MediatR;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using DefaultNamespace.Models;
+using System.Globalization;
+using System.ComponentModel.DataAnnotations;
+using DefaultNamespace.Services;
+using Microsoft.EntityFrameworkCore;
+using DefaultNamespace.Data;
+
+namespace DefaultNamespace
+{
+  [ApiController]
+[Route("api/students")]
+public class StudentController : ControllerBase
+{
+    private readonly IStudentService _studentService;
+private readonly IMediator _mediator;
+ private readonly ApplicationDbContext _context;
+
+
+    public StudentController(IStudentService studentService,IMediator mediator,ApplicationDbContext context)
+    {
+        _studentService = studentService;
+		_mediator = mediator;
+ _context = context;
+    }
+
+
+ [HttpGet]
+    public async Task<IActionResult> GetAll()
+    {
+        var students = await _context.Students.ToListAsync();
+        return Ok(students);
+    }
+
+[HttpGet("{id}")]
+        public async Task<ActionResult<Student>> GetStudent(long id)
+        {
+           var student = await _context.Students.FindAsync((long)id);
+
+            if (student == null)
+            {
+                return NotFound();
+            }
+
+            return student;
+        }
+
+    [HttpGet("filter")]
+    public async Task<ActionResult<List<Student>>> GetStudentsByName(string name)
+    {
+        try
+        {
+            return Ok(await _studentService.GetStudentsByNameAsync(name));
+        }
+        catch (Exception ex) { return HandleException(ex); }
+    }
+
+    [HttpGet("date")]
+    public ActionResult<string> GetFormattedDate()
+    {
+        try
+        {
+            var lang = Request.Headers["Accept-Language"].ToString();
+            return Ok(_studentService.GetFormattedDate(lang));
+        }
+        catch (Exception ex) { return HandleException(ex); }
+    }
+
+    [HttpPost("update")]
+    public IActionResult UpdateStudent(UpdateStudent request)
+    {
+        try
+        {
+            return Ok(_studentService.UpdateStudent(request));
+        }
+        catch (Exception ex) { return HandleException(ex); }
+    }
+
+    [HttpPost("upload-image")]
+    public async Task<IActionResult> UploadImage(IFormFile image)
+    {
+        try
+        {
+            var path = await _studentService.UploadImageAsync(image);
+            return Ok(new { message = "Image uploaded successfully.", filePath = path });
+        }
+        catch (Exception ex) { return HandleException(ex); }
+    }
+
+[HttpDelete("{id:long}")]
+public async Task<IActionResult> Delete(long id)
+{
+    try
+    {
+        var result = await _mediator.Send(new DeleteStudentCommand(id));
+        return Ok(result);
+    }
+    catch (ValidationException ex)
+    {
+        return BadRequest(ex.Message);
+    }
+    catch (KeyNotFoundException ex)
+    {
+        return NotFound(ex.Message);
+    }
+    catch (Exception ex)
+    {
+        return StatusCode(500, $"An unexpected error occurred: {ex.Message}");
+    }
+}
+
+
+    private ObjectResult HandleException(Exception ex) =>
+        ex switch
+        {
+            ValidationException or ArgumentNullException => BadRequest(ex.Message),
+            KeyNotFoundException => NotFound(ex.Message),
+            CultureNotFoundException => BadRequest(ex.Message),
+            NotSupportedException => BadRequest(ex.Message),
+            _ => StatusCode(500, $"Unexpected error: {ex.Message}")
+        };
+}
+
+}
