@@ -1,6 +1,9 @@
 using DefaultNamespace.Services;
 using DefaultNamespace.Middlewares;
 using DefaultNamespace.Filters;
+using Microsoft.EntityFrameworkCore;
+using DefaultNamespace.Data;
+using Pomelo.EntityFrameworkCore.MySql.Infrastructure; 
 using MediatR;
 
 
@@ -14,7 +17,11 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddControllers();
 builder.Services.AddSingleton<IStudentService, StudentService>();
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining(typeof(Program)));
-
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseMySql(
+        builder.Configuration.GetConnectionString("DefaultConnection"),
+        ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("DefaultConnection"))
+    ));
 
 // builder.Services.AddControllers(options =>
 // {

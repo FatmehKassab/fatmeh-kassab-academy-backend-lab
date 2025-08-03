@@ -6,6 +6,8 @@ using DefaultNamespace.Models;
 using System.Globalization;
 using System.ComponentModel.DataAnnotations;
 using DefaultNamespace.Services;
+using Microsoft.EntityFrameworkCore;
+using DefaultNamespace.Data;
 
 namespace DefaultNamespace
 {
@@ -15,30 +17,36 @@ public class StudentController : ControllerBase
 {
     private readonly IStudentService _studentService;
 private readonly IMediator _mediator;
+ private readonly ApplicationDbContext _context;
 
-    public StudentController(IStudentService studentService,IMediator mediator)
+
+    public StudentController(IStudentService studentService,IMediator mediator,ApplicationDbContext context)
     {
         _studentService = studentService;
 		_mediator = mediator;
+ _context = context;
     }
 
 
  [HttpGet]
     public async Task<IActionResult> GetAll()
     {
-        var students = await _mediator.Send(new GetAllStudentsQuery());
+        var students = await _context.Students.ToListAsync();
         return Ok(students);
     }
 
-    [HttpGet("{id:long}")]
-    public async Task<ActionResult<Student>> GetStudent(long id)
-    {
-        try
+[HttpGet("{id}")]
+        public async Task<ActionResult<Student>> GetStudent(long id)
         {
-            return Ok(await _studentService.GetStudentByIdAsync(id));
+           var student = await _context.Students.FindAsync((long)id);
+
+            if (student == null)
+            {
+                return NotFound();
+            }
+
+            return student;
         }
-        catch (Exception ex) { return HandleException(ex); }
-    }
 
     [HttpGet("filter")]
     public async Task<ActionResult<List<Student>>> GetStudentsByName(string name)
