@@ -1,6 +1,8 @@
 using DefaultNamespace.Services;
 using DefaultNamespace.Middlewares;
 using DefaultNamespace.Filters;
+using MediatR;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,10 +13,14 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddControllers();
 builder.Services.AddSingleton<IStudentService, StudentService>();
-builder.Services.AddControllers(options =>
-{
-    options.Filters.Add<CallerHeaderFilter>();
-});
+builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining(typeof(Program)));
+
+
+// builder.Services.AddControllers(options =>
+// {
+//     options.Filters.Add<CallerHeaderFilter>();
+// });
+
 
 var app = builder.Build();
 

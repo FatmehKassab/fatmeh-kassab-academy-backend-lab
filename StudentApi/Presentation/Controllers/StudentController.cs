@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using MediatR;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using DefaultNamespace.Models;
@@ -13,15 +14,21 @@ namespace DefaultNamespace
 public class StudentController : ControllerBase
 {
     private readonly IStudentService _studentService;
+private readonly IMediator _mediator;
 
-    public StudentController(IStudentService studentService)
+    public StudentController(IStudentService studentService,IMediator mediator)
     {
         _studentService = studentService;
+		_mediator = mediator;
     }
 
-    [HttpGet]
-    public async Task<ActionResult<List<Student>>> GetAllStudents() =>
-        Ok(await _studentService.GetAllStudentsAsync());
+
+ [HttpGet]
+    public async Task<IActionResult> GetAll()
+    {
+        var students = await _mediator.Send(new GetAllStudentsQuery());
+        return Ok(students);
+    }
 
     [HttpGet("{id:long}")]
     public async Task<ActionResult<Student>> GetStudent(long id)
@@ -75,15 +82,28 @@ public class StudentController : ControllerBase
         catch (Exception ex) { return HandleException(ex); }
     }
 
-    [HttpDelete("{id:long}")]
-    public IActionResult DeleteStudent(long id)
+[HttpDelete("{id:long}")]
+public async Task<IActionResult> Delete(long id)
+{
+    try
     {
-        try
-        {
-            return Ok(_studentService.DeleteStudent(id));
-        }
-        catch (Exception ex) { return HandleException(ex); }
+        var result = await _mediator.Send(new DeleteStudentCommand(id));
+        return Ok(result);
     }
+    catch (ValidationException ex)
+    {
+        return BadRequest(ex.Message);
+    }
+    catch (KeyNotFoundException ex)
+    {
+        return NotFound(ex.Message);
+    }
+    catch (Exception ex)
+    {
+        return StatusCode(500, $"An unexpected error occurred: {ex.Message}");
+    }
+}
+
 
     private ObjectResult HandleException(Exception ex) =>
         ex switch
