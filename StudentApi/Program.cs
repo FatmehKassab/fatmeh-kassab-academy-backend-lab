@@ -1,5 +1,6 @@
 using DefaultNamespace.Services;
 using DefaultNamespace.Middlewares;
+using DefaultNamespace.Filters;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,6 +11,10 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddControllers();
 builder.Services.AddSingleton<IStudentService, StudentService>();
+builder.Services.AddControllers(options =>
+{
+    options.Filters.Add<CallerHeaderFilter>();
+});
 
 var app = builder.Build();
 
