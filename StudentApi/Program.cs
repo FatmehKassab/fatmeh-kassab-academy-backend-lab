@@ -1,4 +1,5 @@
 using DefaultNamespace.Services;
+using DefaultNamespace.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,6 +13,7 @@ builder.Services.AddSingleton<IStudentService, StudentService>();
 
 var app = builder.Build();
 
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -20,8 +22,10 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseRequestLogging();
 app.UseHttpsRedirection();
 app.MapControllers();
+
 
 
 app.Run();
